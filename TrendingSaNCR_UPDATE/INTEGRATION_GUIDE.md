@@ -1,0 +1,3 @@
+# Current implementation update
+
+See the root README for exact setup, implemented routes, database selection and limits. CSV import is now implemented with an Express/Node backend and SQLite persistence, plus a MySQL adapter. Import windows have been removed; reporting windows filter record dates. Imports upsert matching records and retain all other records. The earlier scoped-window replacement proposal is superseded. Configured Bright Data requests, database-backed account permissions, keyword matching and manual comment review are available. See the root README for first administrator sign-in.

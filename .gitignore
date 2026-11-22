@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+data/
+data_snapshots/
+*.csv
+*.sqlite*
+*.db
+*.zip
+*.exe
+*.msi

@@ -1,0 +1,17 @@
+{
+  "name": "trendsancr",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env backend/server.mjs"
+  },
+  "optionalDependencies": {
+    "mysql2": "^3.15.0"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

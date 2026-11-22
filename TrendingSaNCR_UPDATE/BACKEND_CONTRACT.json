@@ -1,0 +1,188 @@
+{
+  "version": "1.0-ui-contract",
+  "implementation_status": "Express backend with persistent CSV import (SQLite default; MySQL adapter available)",
+  "platforms": [
+    "Facebook",
+    "Instagram",
+    "TikTok",
+    "YouTube",
+    "LinkedIn",
+    "X"
+  ],
+  "filters": {
+    "campaign_id": "string|null",
+    "platform": "platform|null (null = All platforms)",
+    "window": [
+      "1",
+      "7",
+      "30",
+      "all"
+    ],
+    "timezone": "Asia/Manila",
+    "as_of": "ISO-8601 explicit reporting anchor",
+    "content_date_field": "published_at",
+    "comment_date_field": "commented_at",
+    "profile_date_field": "collected_at"
+  },
+  "empty_semantics": {
+    "missing": "null rendered as —",
+    "measured_zero": "0 only if input explicitly supports zero",
+    "no_records": "empty array",
+    "coverage": "store observed_count and eligible_count alongside totals",
+    "all_time": "all eligible dated records supplied; account lifetime counters remain separate"
+  },
+  "entities": {
+    "campaign": [
+      "id",
+      "display_name",
+      "ncr_basis",
+      "created_at"
+    ],
+    "profile": [
+      "id",
+      "campaign_id",
+      "platform",
+      "source_profile_id",
+      "display_name",
+      "username",
+      "url",
+      "avatar_url",
+      "description",
+      "website",
+      "declared_location",
+      "followers",
+      "following",
+      "content_total",
+      "received_likes",
+      "channel_views",
+      "company_details",
+      "collected_at",
+      "source_batch_id"
+    ],
+    "content": [
+      "id",
+      "campaign_id",
+      "profile_id",
+      "platform",
+      "source_content_id",
+      "url",
+      "title",
+      "text",
+      "type",
+      "published_at",
+      "collected_at",
+      "like_count",
+      "reaction_count",
+      "reported_comment_count",
+      "share_count",
+      "save_count",
+      "view_count",
+      "play_count",
+      "quote_count",
+      "bookmark_count",
+      "hashtags",
+      "source_field_provenance",
+      "source_batch_id"
+    ],
+    "comment": [
+      "id",
+      "campaign_id",
+      "platform",
+      "source_comment_id",
+      "source_parent_id",
+      "parent_content_url",
+      "parent_content_id",
+      "text",
+      "author_platform_id",
+      "author_handle",
+      "commented_at",
+      "collected_at",
+      "like_count",
+      "is_campaign_author",
+      "source_batch_id"
+    ],
+    "keyword_rule": [
+      "id",
+      "phrase",
+      "registered_variations",
+      "category",
+      "sentiment_label",
+      "active",
+      "version",
+      "approved_at"
+    ],
+    "classification": [
+      "comment_id",
+      "rule_version",
+      "matched_rules",
+      "label",
+      "processing_status",
+      "review_status",
+      "reviewer_id"
+    ],
+    "import_batch": [
+      "id",
+      "campaign_id",
+      "platform",
+      "record_type",
+      "window",
+      "filename",
+      "status",
+      "row_count",
+      "error_count",
+      "created_at"
+    ],
+    "collection_job": [
+      "id",
+      "campaign_id",
+      "platform",
+      "dataset_id",
+      "snapshot_id",
+      "stage",
+      "error",
+      "requested_at",
+      "finished_at"
+    ]
+  },
+  "metric_definitions": {
+    "known_interactions": "Sum available likes OR reactions, reported comments, shares/reposts and saves on deduplicated content. Do not add likes and reactions twice. Quotes/bookmarks remain separate until a validated formula includes them.",
+    "combined_totals": "Sum known platform values. Missing platform input stays null; show coverage. Followers and commenter totals are not deduplicated people across platforms.",
+    "views_or_plays": "Display mixed view/play total only with platform coverage and source provenance. Never add two counters describing the same content exposure.",
+    "collected_comments": "Count distinct successfully parsed comment IDs; independent of reported comment counters.",
+    "returning_commenters": "Distinct platform-scoped author IDs with comments on at least two distinct content items; exclude campaign author where identified.",
+    "sentiment": "Versioned exact / variation phrase rules; pending, positive, negative, neutral, mixed, unclassified. Manual review retained. No trained NLP model.",
+    "trend_power": "Needs validated recurrence rules, eligible windows and minimum coverage. No fabricated score from a single snapshot.",
+    "risk": "Reviewable repeated-text and dated comment concentration evidence; no authenticity percentage or proven-fraud conclusion."
+  },
+  "proposed_routes": {
+    "GET /api/campaigns": "registered campaigns and linked profiles",
+    "GET /api/analytics/:module": "shared filters; values, records, coverage and provenance",
+    "POST /api/imports/preview": "multipart CSV -> mapping and validation; no replacement",
+    "POST /api/imports/:id/commit": "explicit confirmed scoped replacement in one transaction",
+    "GET /api/imports": "history and row errors",
+    "POST /api/collection-jobs": "user-requested Bright Data profile/content/comment workflow",
+    "GET /api/collection-jobs/:id": "stage, snapshot progress and failures; browser polls while active",
+    "POST /api/reports": "generate from processed shared data"
+  },
+  "job_stages": [
+    "requested",
+    "collecting_profiles",
+    "discovering_content",
+    "collecting_comments",
+    "validating",
+    "computing_analytics",
+    "completed",
+    "failed"
+  ],
+  "security": "API tokens server-only; authorize writes; no automatic scheduled collection.",
+  "import_mode": "URL detection; type inference; date-independent preview/commit; idempotent shared upsert",
+  "access_and_library_routes": {
+    "GET /api/session": "Current role and signed-in identity",
+    "POST /api/login, /api/logout": "Open or end a server session",
+    "GET, POST /api/accounts; PUT, DELETE /api/accounts/:id": "Administrator account management",
+    "GET /api/keywords": "Read approved rules",
+    "POST /api/keywords; PUT, DELETE /api/keywords/:id": "Administrator or analyst keyword management",
+    "GET /api/data?keywords=1": "Per-record matches and classifications for the selected filters",
+    "POST /api/reviews": "Administrator or analyst decision against current comment evidence"
+  }
+}
